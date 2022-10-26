@@ -6,12 +6,15 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.text.DecimalFormat;
+
 public class MainActivity extends AppCompatActivity {
     private Button btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9, btnAdd, btnDiv, btnMal, btnMin, btnEqual, btnAc, btnDel, btnDot;
     private TextView textViewResult, textViewHistory;
-    private String number = null, status = null;
+    private String number = null, status = null, history="";
     private double firstNum = 0, lastNum = 0;
     boolean operator = false;
+    DecimalFormat decimalFormat = new DecimalFormat("######.######");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,10 +32,44 @@ public class MainActivity extends AppCompatActivity {
         btnClick(btn8);
         btnClick(btn9);
         btnClick(btnDot);
-        btnAdd.setOnClickListener(view -> checkOperation("addition"));
-        btnDiv.setOnClickListener(view -> checkOperation("division"));
-        btnMin.setOnClickListener(view -> checkOperation("subtraction"));
-        btnMal.setOnClickListener(view -> checkOperation("multiplication"));
+        btnAdd.setOnClickListener(view -> {
+            history +="+";
+            checkOperation("addition");});
+        btnDiv.setOnClickListener(view -> {
+            history +="/";
+            checkOperation("division");
+        });
+        btnMin.setOnClickListener(view -> {
+            history +="-";
+            checkOperation("subtraction");});
+        btnMal.setOnClickListener(view -> {
+            history +="*";
+            checkOperation("multiplication");});
+        btnEqual.setOnClickListener(view -> checkOperation(status));
+        btnAc.setOnClickListener(view -> {
+            number = null;
+            status = null;
+            textViewResult.setText("0");
+            textViewHistory.setText("");
+            firstNum = 0;
+            lastNum = 0;
+            history = "";
+        });
+        btnDel.setOnClickListener(view -> {
+            if (number != null && number.length() > 1) {
+                number = number.substring(0, number.length() - 1);
+                textViewResult.setText(number);
+            } else {
+                number = null;
+                status = null;
+                textViewResult.setText("0");
+                textViewHistory.setText("");
+                firstNum = 0;
+                lastNum = 0;
+            }
+
+
+        });
 
 
     }
@@ -76,14 +113,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void btnClick(Button btn) {
-        btn.setOnClickListener(view -> numberClick(btn.getText().toString()));
+        if (btn.getText().toString().equals(".")) {
+            if (number == null) {
+                number = "0";
+
+            }
+        }
+        btn.setOnClickListener(view -> {
+            historyShow(btn);
+            numberClick(btn.getText().toString());
+        });
     }
 
     private void plus() {
         lastNum = Double.parseDouble(textViewResult.getText().toString());
         firstNum += lastNum;
-        textViewResult.setText(Double.toString(firstNum));
+        textViewResult.setText(decimalFormat.format(firstNum));
         operator = true;
+
     }
 
     private void minus() {
@@ -93,8 +140,9 @@ public class MainActivity extends AppCompatActivity {
             lastNum = Double.parseDouble(textViewResult.getText().toString());
             firstNum -= lastNum;
         }
-        textViewResult.setText(Double.toString(firstNum));
+        textViewResult.setText(decimalFormat.format(firstNum));
         operator = true;
+
     }
 
     private void multiply() {
@@ -103,8 +151,9 @@ public class MainActivity extends AppCompatActivity {
         }
         lastNum = Double.parseDouble(textViewResult.getText().toString());
         firstNum *= lastNum;
-        textViewResult.setText(Double.toString(firstNum));
+        textViewResult.setText(decimalFormat.format(firstNum));
         operator = true;
+
 
     }
 
@@ -117,32 +166,55 @@ public class MainActivity extends AppCompatActivity {
             firstNum /= lastNum;
         }
 
-        textViewResult.setText(Double.toString(firstNum));
+        textViewResult.setText(decimalFormat.format(firstNum));
         operator = true;
+
 
     }
 
     private void checkOperation(String operation) {
-        status = operation;
-        if (operator) {
-            switch (status) {
-                case "multiplication":
-                    multiply();
-                    break;
-                case "division":
-                    divide();
-                    break;
-                case "addition":
-                    plus();
-                    break;
-                case "subtraction":
-                    minus();
-                    break;
-            }
+
+
+        if (operation != null) {
             status = operation;
-            operator = false;
-            number = null;
+
+            if (operator) {
+                switch (status) {
+                    case "multiplication":
+                        multiply();
+
+                        break;
+                    case "division":
+
+                        divide();
+
+                        break;
+                    case "addition":
+                        plus();
+
+                        break;
+                    case "subtraction":
+                        minus();
+
+                        break;
+                    default:
+                        break;
+                }
+                operator = false;
+                number = null;
+
+
+            }
+        } else {
+            number = textViewResult.getText().toString();
         }
+
+
+    }
+
+    private void historyShow(Button btn) {
+        history += btn.getText().toString();
+        textViewHistory.setText(history);
 
     }
 
